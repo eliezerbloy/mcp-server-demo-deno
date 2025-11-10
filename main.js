@@ -14,17 +14,6 @@ import dadJokes from "@mikemcbride/dad-jokes";
 import express from "express";
 import { z } from "zod";
 
-const parents = ["אליעזר", "רבקי"];
-const children = ["טובי", "דודי", "רחלי", "מאיר", "ליבי"];
-const address = "פנחס לוין 27, עמנואל";
-
-// מקבל מערך ומחזיר איבר אקראי
-// function randomChoice(arr) {
-//   if (arr.length === 0) return undefined; // טיפול במערך ריק
-//   const idx = Math.floor(Math.random() * arr.length); // יוצר אינדקס אקראי ב-[0, arr.length-1]
-//   return arr[idx];
-// }
-
 const server = new McpServer({
   name: "My MCP Server",
   version: "1.0.0",
@@ -35,68 +24,45 @@ const server = new McpServer({
 });
 
 server.registerTool(
-  "give-me-the-demo-parents",
+  "tell-me-a-joke",
   {
-    // inputSchema: {
-    //   id: z
-    //     .number()
-    //     .min(0)
-    //     .max(dadJokes.all.length - 1)
-    //     .describe("joke id"),
-    // },
-    title: "Give me the names of the demo parents.",
-    description: `Give me the names of the demo parents.`,
+    inputSchema: {
+      id: z.number().min(0).max(dadJokes.all.length - 1).describe('joke id')
+    },
+    title: 'Joke Teller',
+    description: `Tells a joke according to its index. Valid ids 0-${dadJokes.all.length - 1}`,    
   },
-  () => {
-    // const joke = { joke: dadJokes.all[id] };
-    return {
+  async ({id}) => {
+    const joke = { joke: dadJokes.all[id] };
+    return ({
       content: [
         {
           type: "text",
-          text: JSON.stringify({ parents }),
-        },
+          text: JSON.stringify(joke),
+        }
       ],
-      structuredContent: { parents },
-    };
+      structuredContent: {joke},
+    })
   }
-);
+)
 
 server.registerTool(
-  "give-demo-children's-list",
+  "tell-me-a-random-joke",
   {
-    title: "Giving demo children's list",
-    description: "Giving demo children's list",
+    title: "Random Joke Teller",
+    description: "Tells a random joke",
   },
   () => {
-    // const child = { child: randomChoice(children) };
+    const joke = { joke: dadJokes.random() };
 
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify({ children }),
+          text: JSON.stringify(joke),
         },
       ],
-      structuredContent: { children },
-    };
-  }
-);
-
-server.registerTool(
-  "give-me-my-demo-address",
-  {
-    title: "Returns my demo residential address",
-    description: "Returns my demo residential address",
-  },
-  () => {
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify({ address }),
-        },
-      ],
-      structuredContent: { address },
+      structuredContent: joke,
     };
   }
 );
@@ -105,30 +71,28 @@ server.registerTool(
 const app = express();
 app.use(express.json());
 
-app.post("/mcp", async (req, res) => {
-  // Create a new transport for each request to prevent request ID collisions
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
-    enableJsonResponse: true,
-  });
+app.post('/mcp', async (req, res) => {
+    // Create a new transport for each request to prevent request ID collisions
+    const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableJsonResponse: true
+    });
 
-  res.on("close", () => {
-    transport.close();
-  });
+    res.on('close', () => {
+        transport.close();
+    });
 
-  await server.connect(transport);
-  await transport.handleRequest(req, res, req.body);
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
 });
 
-const port = parseInt(process.env.PORT || "3000");
-app
-  .listen(port, () => {
+const port = parseInt(process.env.PORT || '3000');
+app.listen(port, () => {
     console.log(`Demo MCP Server running on http://localhost:${port}/mcp`);
-  })
-  .on("error", (error) => {
-    console.error("Server error:", error);
+}).on('error', error => {
+    console.error('Server error:', error);
     process.exit(1);
-  });
+});
 
 // STDIO Server
 // const transport = new StdioServerTransport();
