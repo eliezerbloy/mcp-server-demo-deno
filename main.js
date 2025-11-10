@@ -71,7 +71,7 @@ server.registerTool(
 const app = express();
 app.use(express.json());
 
-app.post('/mcp', async (req: any, res: any) => {
+app.post('/mcp', async (req, res) => {
     // Create a new transport for each request to prevent request ID collisions
     const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
