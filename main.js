@@ -14,6 +14,17 @@ import dadJokes from "@mikemcbride/dad-jokes";
 import express from "express";
 import { z } from "zod";
 
+const parents = ["אליעזר", "רבקי"];
+const children = ["טובי", "דודי", "רחלי", "מאיר", "ליבי"];
+const address = "פנחס לוין 27, עמנואל";
+
+// מקבל מערך ומחזיר איבר אקראי
+// function randomChoice(arr) {
+//   if (arr.length === 0) return undefined; // טיפול במערך ריק
+//   const idx = Math.floor(Math.random() * arr.length); // יוצר אינדקס אקראי ב-[0, arr.length-1]
+//   return arr[idx];
+// }
+
 const server = new McpServer({
   name: "My MCP Server",
   version: "1.0.0",
@@ -24,45 +35,68 @@ const server = new McpServer({
 });
 
 server.registerTool(
-  "tell-me-a-joke",
+  "give-me-the-parents",
   {
-    inputSchema: {
-      id: z.number().min(0).max(dadJokes.all.length - 1).describe('joke id')
-    },
-    title: 'Joke Teller',
-    description: `Tells a joke according to its index. Valid ids 0-${dadJokes.all.length - 1}`,    
+    // inputSchema: {
+    //   id: z
+    //     .number()
+    //     .min(0)
+    //     .max(dadJokes.all.length - 1)
+    //     .describe("joke id"),
+    // },
+    title: "Give me the names of the parents.",
+    description: `Give me the names of the parents.`,
   },
-  async ({id}) => {
-    const joke = { joke: dadJokes.all[id] };
-    return ({
+  () => {
+    // const joke = { joke: dadJokes.all[id] };
+    return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(joke),
-        }
+          text: JSON.stringify({ parents }),
+        },
       ],
-      structuredContent: {joke},
-    })
+      structuredContent: { parents },
+    };
   }
-)
+);
 
 server.registerTool(
-  "tell-me-a-random-joke",
+  "give-my-children's-list",
   {
-    title: "Random Joke Teller",
-    description: "Tells a random joke",
+    title: "Giving my children's list",
+    description: "Giving my children's list",
   },
   () => {
-    const joke = { joke: dadJokes.random() };
+    // const child = { child: randomChoice(children) };
 
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(joke),
+          text: JSON.stringify({ children }),
         },
       ],
-      structuredContent: joke,
+      structuredContent: { children },
+    };
+  }
+);
+
+server.registerTool(
+  "give-me-my-address",
+  {
+    title: "Returns my residential address",
+    description: "Returns my residential address",
+  },
+  () => {
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({ address }),
+        },
+      ],
+      structuredContent: { address },
     };
   }
 );
@@ -71,28 +105,30 @@ server.registerTool(
 const app = express();
 app.use(express.json());
 
-app.post('/mcp', async (req, res) => {
-    // Create a new transport for each request to prevent request ID collisions
-    const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-        enableJsonResponse: true
-    });
+app.post("/mcp", async (req, res) => {
+  // Create a new transport for each request to prevent request ID collisions
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true,
+  });
 
-    res.on('close', () => {
-        transport.close();
-    });
+  res.on("close", () => {
+    transport.close();
+  });
 
-    await server.connect(transport);
-    await transport.handleRequest(req, res, req.body);
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
 });
 
-const port = parseInt(process.env.PORT || '3000');
-app.listen(port, () => {
+const port = parseInt(process.env.PORT || "3000");
+app
+  .listen(port, () => {
     console.log(`Demo MCP Server running on http://localhost:${port}/mcp`);
-}).on('error', error => {
-    console.error('Server error:', error);
+  })
+  .on("error", (error) => {
+    console.error("Server error:", error);
     process.exit(1);
-});
+  });
 
 // STDIO Server
 // const transport = new StdioServerTransport();
