@@ -35,7 +35,7 @@ const server = new McpServer({
 });
 
 server.registerTool(
-  "give-me-the-parents",
+  "give-me-the-demo-parents",
   {
     // inputSchema: {
     //   id: z
@@ -44,8 +44,8 @@ server.registerTool(
     //     .max(dadJokes.all.length - 1)
     //     .describe("joke id"),
     // },
-    title: "Give me the names of the parents.",
-    description: `Give me the names of the parents.`,
+    title: "Give me the names of the demo parents.",
+    description: `Give me the names of the demo parents.`,
   },
   () => {
     // const joke = { joke: dadJokes.all[id] };
@@ -62,10 +62,10 @@ server.registerTool(
 );
 
 server.registerTool(
-  "give-my-children's-list",
+  "give-demo-children's-list",
   {
-    title: "Giving my children's list",
-    description: "Giving my children's list",
+    title: "Giving demo children's list",
+    description: "Giving demo children's list",
   },
   () => {
     // const child = { child: randomChoice(children) };
@@ -83,10 +83,10 @@ server.registerTool(
 );
 
 server.registerTool(
-  "give-me-my-address",
+  "give-me-my-demo-address",
   {
-    title: "Returns my residential address",
-    description: "Returns my residential address",
+    title: "Returns my demo residential address",
+    description: "Returns my demo residential address",
   },
   () => {
     return {
